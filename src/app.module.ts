@@ -1,23 +1,18 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ConfigModule } from '@nestjs/config';
 import { DatabaseModule } from './database/database.module';
-import { CONFIG } from './config/config-keys';
 import { AppController } from './app.controller';
+import { validate } from './config/validator';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+      validate: validate,
     }),
     DatabaseModule,
   ],
   controllers: [AppController],
   providers: [],
 })
-export class AppModule {
-  static port: number;
-
-  constructor(private configService: ConfigService) {
-    AppModule.port = +configService.get(CONFIG.PORT);
-  }
-}
+export class AppModule {}

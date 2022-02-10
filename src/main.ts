@@ -1,40 +1,47 @@
 import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
 import { INestApplication, Logger, ValidationPipe } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { AppModule } from './app.module';
+import { CONFIG } from './config/keys';
+
+async function bootstrap() {
+  const app = await NestFactory.create(AppModule);
+  const config = app.get(ConfigService);
+
+  app.useGlobalPipes(
+    new ValidationPipe({
+      transform: true,
+    }),
+  );
+
+  app.enableCors();
+
+  app.setGlobalPrefix('api');
+
+  app.enableVersioning();
+
+  const port = config.get(CONFIG.PORT);
+
+  await app.listen(port);
+
+  listRoutes(app);
+
+  Logger.log(`App running at port ${port}`, 'Bootstrap');
+}
+bootstrap();
 
 function listRoutes(app: INestApplication) {
   const server = app.getHttpServer();
   const router = server._events.request._router;
   const availableRoutes: [] = router?.stack
-    .map((layer) => {
-      if (layer.route) {
-        return {
-          route: {
-            path: layer.route?.path,
-            method: layer.route?.stack[0]?.method,
-          },
-        };
-      }
-    })
-    .filter((item) => item !== undefined);
+    .filter((layer) => !!layer.route)
+    .map((layer) => ({
+      route: {
+        path: layer.route?.path,
+        method: layer.route?.stack[0]?.method,
+      },
+    }));
 
   Logger.log('API list:', 'Bootstrap');
   console.table(availableRoutes);
 }
-
-async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
-
-  app.useGlobalPipes(new ValidationPipe());
-
-  app.enableCors();
-
-  app.setGlobalPrefix('api/v1');
-
-  await app.listen(AppModule.port);
-
-  listRoutes(app);
-
-  Logger.log(`App running at port ${AppModule.port}`, 'Bootstrap');
-}
-bootstrap();
