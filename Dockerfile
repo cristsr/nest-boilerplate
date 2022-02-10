@@ -16,5 +16,5 @@ RUN npm install ci --only=production --ignore-scripts
 EXPOSE 3000
 CMD ["npm", "run", "start:prod"]
 
-# docker build -t credit-solicitation-ms:latest .
-# docker run -d -p 3000:3000 credit-solicitation-ms:latest
+# docker build -t boilerplate:latest .
+# docker run -d -p 3000:3000 boilerplate:latest
