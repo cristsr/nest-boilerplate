@@ -4,4 +4,4 @@ DB_HOST = localhost
 DB_PORT = 5432
 DB_USERNAME = root@localhost
 DB_PASSWORD = my.password
-DB_NAME = credit-solicitation
+DB_NAME = my.db
