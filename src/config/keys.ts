@@ -16,31 +16,7 @@ export class Environment {
   PORT: number = undefined;
 
   @IsString()
-  DB_HOST: string = undefined;
-
-  @IsString()
-  DB_TYPE: string = undefined;
-
-  @Transform(({ value }) => Number(value))
-  @IsNumber()
-  DB_PORT: number = undefined;
-
-  @IsString()
-  DB_USERNAME: string = undefined;
-
-  @IsString()
-  DB_PASSWORD: string = undefined;
-
-  @IsString()
-  DB_NAME: string = undefined;
-
-  @Transform(({ value }) => value === 'true')
-  @IsBoolean()
-  DB_SSL: boolean = undefined;
-
-  @Transform(({ value }) => value === 'true')
-  @IsBoolean()
-  DB_SYNCHRONIZE: boolean = undefined;
+  DB_URI: string = undefined;
 
   @Transform(({ value }) => value === 'true')
   @IsBoolean()
@@ -49,7 +25,7 @@ export class Environment {
 
 const keys = Object.keys(new Environment()) as (keyof Environment)[];
 
-const entries = keys.map((key) => [key, key]);
+const entries: (keyof Environment)[][] = keys.map((key) => [key, key]);
 
 /**
  * Object created dynamically to access all properties defined in Environment class

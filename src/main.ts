@@ -1,12 +1,13 @@
 import { NestFactory } from '@nestjs/core';
 import { INestApplication, Logger, ValidationPipe } from '@nestjs/common';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
 import { AppModule } from './app.module';
 import { CONFIG } from './config/keys';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  const config = app.get(ConfigService);
+  const configService = app.get(ConfigService);
 
   app.useGlobalPipes(
     new ValidationPipe({
@@ -20,7 +21,23 @@ async function bootstrap() {
 
   app.enableVersioning();
 
-  const port = config.get(CONFIG.PORT);
+  const showDocs: boolean = configService.get(CONFIG.SHOW_DOCS);
+
+  if (showDocs) {
+    const config = new DocumentBuilder()
+      .setTitle('Boilerplate')
+      .setDescription('The Boilerplate API description')
+      .setVersion('1.0')
+      .build();
+
+    const document = SwaggerModule.createDocument(app, config);
+
+    SwaggerModule.setup('docs', app, document, {
+      useGlobalPrefix: false,
+    });
+  }
+
+  const port = configService.get(CONFIG.PORT);
 
   await app.listen(port);
 
