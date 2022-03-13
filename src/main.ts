@@ -3,17 +3,13 @@ import { INestApplication, Logger, ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
 import { AppModule } from './app.module';
-import { CONFIG } from './config/keys';
+import { ENV } from 'environment';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const configService = app.get(ConfigService);
 
-  app.useGlobalPipes(
-    new ValidationPipe({
-      transform: true,
-    }),
-  );
+  app.useGlobalPipes(new ValidationPipe({ transform: true }));
 
   app.enableCors();
 
@@ -21,7 +17,7 @@ async function bootstrap() {
 
   app.enableVersioning();
 
-  const showDocs: boolean = configService.get(CONFIG.SHOW_DOCS);
+  const showDocs: boolean = configService.get(ENV.SHOW_DOCS);
 
   if (showDocs) {
     const config = new DocumentBuilder()
@@ -37,7 +33,7 @@ async function bootstrap() {
     });
   }
 
-  const port = configService.get(CONFIG.PORT);
+  const port = configService.get(ENV.PORT);
 
   await app.listen(port);
 
