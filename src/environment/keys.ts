@@ -1,5 +1,6 @@
 import { IsBoolean, IsNumber, IsString } from 'class-validator';
 import { Transform } from 'class-transformer';
+import { mapEnvironmentKeys } from 'src/environment/utils';
 
 /**
  * Define here all environment variables and initialize them
@@ -23,10 +24,6 @@ export class Environment {
   SHOW_DOCS: boolean = undefined;
 }
 
-const keys = Object.keys(new Environment()) as (keyof Environment)[];
-
-const entries: (keyof Environment)[][] = keys.map((key) => [key, key]);
-
 /**
  * Object created dynamically to access all properties defined in Environment class
  * used as enum to retrieve values using ConfigService.
@@ -46,6 +43,4 @@ const entries: (keyof Environment)[][] = keys.map((key) => [key, key]);
  * }
  * ```
  */
-export const CONFIG = Object.fromEntries(entries) as {
-  [key in keyof Environment]: string;
-};
+export const ENV = mapEnvironmentKeys<Environment>(Environment);
