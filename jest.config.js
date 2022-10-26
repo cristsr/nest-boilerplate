@@ -19,7 +19,7 @@ module.exports = {
   moduleFileExtensions: ['ts', 'js'],
 
   moduleNameMapper: {
-    'config/(.*)': '<rootDir>/src/config/$1',
+    'environment/(.*)': '<rootDir>/src/environment/$1',
     'database/(.*)': '<rootDir>/src/database/$1',
     'shared/(.*)': '<rootDir>/src/shared/$1',
     'utilities/(.*)': '<rootDir>/src/utilities/$1',

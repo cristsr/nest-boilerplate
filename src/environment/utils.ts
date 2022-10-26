@@ -1,7 +1,11 @@
 import { plainToClass } from 'class-transformer';
-import { validateSync } from 'class-validator';
+import { getMetadataStorage, validateSync } from 'class-validator';
 import { Logger, Type } from '@nestjs/common';
 import { Environment } from './keys';
+
+export type Keys<T> = Readonly<{
+  [key in keyof T]: key;
+}>;
 
 export function validate(config: Record<string, unknown>) {
   const logger = new Logger(validate.name);
@@ -24,12 +28,20 @@ export function validate(config: Record<string, unknown>) {
   return validatedConfig;
 }
 
-export function mapEnvironmentKeys<T>(type: Type<T>): Readonly<{
-  [key in keyof T]: string;
-}> {
-  const keys = Object.keys(new type()) as (keyof T)[];
+export function mapEnvironmentKeys<T>(type: Type<T>): Keys<T> {
+  const metadataStorage = getMetadataStorage();
 
-  const entries: (keyof T)[][] = keys.map((key) => [key, key]);
+  const targetMetadata = metadataStorage.getTargetValidationMetadatas(
+    type,
+    null,
+    false,
+    false,
+  );
+
+  const entries = targetMetadata.map(({ propertyName }) => [
+    propertyName,
+    propertyName,
+  ]);
 
   return Object.freeze(Object.fromEntries(entries));
 }

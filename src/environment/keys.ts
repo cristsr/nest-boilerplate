@@ -3,25 +3,24 @@ import { Transform } from 'class-transformer';
 import { mapEnvironmentKeys } from 'src/environment/utils';
 
 /**
- * Define here all environment variables and initialize them
- * with undefined to create dynamic CONFIG object that is used
+ * Define here all environment variables to create dynamic CONFIG object that is used
  * to access to all properties using ConfigService.
  * @see https://docs.nestjs.com/techniques/configuration
  */
 export class Environment {
   @IsString()
-  ENV: string = undefined;
+  ENV: string;
 
   @Transform(({ value }) => Number(value))
   @IsNumber()
-  PORT: number = undefined;
+  PORT: number;
 
   @IsString()
-  DB_URI: string = undefined;
+  DB_URI: string;
 
   @Transform(({ value }) => value === 'true')
   @IsBoolean()
-  SHOW_DOCS: boolean = undefined;
+  SHOW_DOCS: boolean;
 }
 
 /**

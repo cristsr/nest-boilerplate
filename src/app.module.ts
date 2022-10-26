@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { DatabaseModule } from 'database';
 import { AppController } from './app.controller';
 import { validate } from 'environment';
 
@@ -10,7 +9,7 @@ import { validate } from 'environment';
       isGlobal: true,
       validate: validate,
     }),
-    DatabaseModule,
+    // DatabaseModule,
   ],
   controllers: [AppController],
   providers: [],
