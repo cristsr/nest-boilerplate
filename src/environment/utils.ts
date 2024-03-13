@@ -1,6 +1,6 @@
+import { Logger, Type } from '@nestjs/common';
 import { plainToClass } from 'class-transformer';
 import { getMetadataStorage, validateSync } from 'class-validator';
-import { Logger, Type } from '@nestjs/common';
 import { Environment } from './keys';
 
 export type Keys<T> = Readonly<{

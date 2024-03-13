@@ -1,9 +1,9 @@
-import { NestFactory } from '@nestjs/core';
 import { INestApplication, Logger, ValidationPipe } from '@nestjs/common';
-import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
-import { AppModule } from './app.module';
+import { NestFactory } from '@nestjs/core';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ENV } from 'environment';
+import { AppModule } from './app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -56,5 +56,6 @@ function listRoutes(app: INestApplication) {
     }));
 
   Logger.log('API list:', 'Bootstrap');
+  // eslint-disable-next-line no-console
   console.table(availableRoutes);
 }

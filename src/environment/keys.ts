@@ -1,5 +1,5 @@
-import { IsBoolean, IsNumber, IsString } from 'class-validator';
 import { Transform } from 'class-transformer';
+import { IsBoolean, IsNumber, IsString } from 'class-validator';
 import { mapEnvironmentKeys } from 'src/environment/utils';
 
 /**
