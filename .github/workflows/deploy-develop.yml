@@ -1,0 +1,140 @@
+name: Run Deploy Develop
+
+on:
+  push:
+    branches:
+      - develop
+
+env:
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
+  TERRAFORM_VERSION: ${{ secrets.TERRAFORM_VERSION }}
+  TERRAFORM_ROLE: arn:aws:iam::902127070362:role/tf-iam-role-terraform
+  IMAGE_TAG: image-api:latest
+  ECR_IMAGE: 902127070362.dkr.ecr.sa-east-1.amazonaws.com/nest-api:${{ github.sha }}
+  ECR_IMAGE_LATEST: 902127070362.dkr.ecr.sa-east-1.amazonaws.com/nest-api:integration
+
+jobs:
+#  pre-build:
+#    name: Pre-build
+#    runs-on: ubuntu-latest
+#    steps:
+#      - uses: actions/checkout@v3
+#      - uses: actions/setup-node@v3
+#        with:
+#          node-version-file: '.nvmrc'
+#          cache: 'npm'
+#          cache-dependency-path: '**/package-lock.json'
+#
+#      - name: Install dependencies
+#        run: npm ci
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+#    needs: pre-build
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'npm'
+          cache-dependency-path: '**/package-lock.json'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint code
+        run: npm run lint
+
+#  test:
+#    name: Unit Test
+#    runs-on: ubuntu-latest
+#    needs: pre-build
+#    steps:
+#      - uses: actions/checkout@v3
+#      - uses: actions/setup-node@v3
+#        with:
+#          node-version-file: '.nvmrc'
+#          cache: 'npm'
+#          cache-dependency-path: '**/package-lock.json'
+#
+#      - name: Install dependencies
+#        run: npm ci
+#
+#      - name: Test code
+#        continue-on-error: true
+#        run: NODE_ENV=test npm run test
+
+  build:
+    name: Build Image
+    runs-on: ubuntu-latest
+    needs: [ lint ]
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_DEFAULT_REGION }}
+          role-to-assume: ${{ env.TERRAFORM_ROLE }}
+          role-duration-seconds: 3600
+
+      - name: Login to Amazon ECR Private
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Pull latest image from repository
+        continue-on-error: true
+        run: |
+          docker pull $ECR_IMAGE_LATEST
+
+      - name: Build, tag, and push image to Amazon ECR
+        id: build-image
+        run: |
+          docker build --cache-from $ECR_IMAGE_LATEST -t $IMAGE_TAG -f docker/integration.Dockerfile .
+          docker tag $IMAGE_TAG $ECR_IMAGE
+          docker tag $IMAGE_TAG $ECR_IMAGE_LATEST
+          docker push $ECR_IMAGE
+          docker push $ECR_IMAGE_LATEST
+
+  deploy:
+    name: Deploy
+    runs-on: self-hosted
+    needs: [ build ]
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_DEFAULT_REGION }}
+          role-to-assume: ${{ env.TERRAFORM_ROLE }}
+          role-duration-seconds: 3600
+
+      - name: Terraform Init
+        uses: hashicorp/setup-terraform@v2
+        id: terraform-init
+        with:
+          terraform_version: ${{ env.TERRAFORM_VERSION }}
+
+      - name: Plan Terraform
+        id: plan
+        continue-on-error: false
+        run: |
+          cd deploy/services/integration
+          terraform init
+          TF_VAR_image=$ECR_IMAGE terraform plan
+
+      - name: Apply Terraform
+        id: apply
+        continue-on-error: false
+        run: |
+          cd deploy/services/integration
+          terraform init
+          TF_VAR_image=$ECR_IMAGE terraform apply -auto-approve
