@@ -1,4 +1,4 @@
-data "terraform_remote_state" "docred" {
+data "terraform_remote_state" "replaceme" {
   backend = "s3"
 
   config = {

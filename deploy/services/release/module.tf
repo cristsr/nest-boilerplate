@@ -9,7 +9,7 @@ module "service" {
 
   environment_name = local.environment_name
 
-  ecs_cluster_id             = data.terraform_remote_state.docred.outputs.release.cluster_id
+  ecs_cluster_id             = data.terraform_remote_state.replaceme.outputs.release.cluster_id
   service_name               = local.service_name
   service_desired_count      = 1
   service_image              = var.image
@@ -27,10 +27,10 @@ EOF
 
   service_log_type            = "ecs_text"
   service_port                = "8080"
-  vpc_id                      = data.terraform_remote_state.docred.outputs.vpc.vpc_id
-  alb_listener_arn            = data.terraform_remote_state.docred.outputs.alb.https_listener_arns[0]
+  vpc_id                      = data.terraform_remote_state.replaceme.outputs.vpc.vpc_id
+  alb_listener_arn            = data.terraform_remote_state.replaceme.outputs.alb.https_listener_arns[0]
   service_master_stage_domain = "release.test.com"
-  security_groups             = [data.terraform_remote_state.docred.outputs.httpx_from_anywhere_id]
-  subnets                     = data.terraform_remote_state.docred.outputs.vpc.private_subnets
-  service_discovery_namespace = data.terraform_remote_state.docred.outputs.release.namespace
+  security_groups             = [data.terraform_remote_state.replaceme.outputs.httpx_from_anywhere_id]
+  subnets                     = data.terraform_remote_state.replaceme.outputs.vpc.private_subnets
+  service_discovery_namespace = data.terraform_remote_state.replaceme.outputs.release.namespace
 }
